@@ -1,8 +1,16 @@
 # aioqiniu
 
+![][qiniu]
+
 ![][version] ![][license] ![][python]
 
 `aioqiniu`是基于`aiohttp`的七牛云Python异步客户端库。
+
+## Install
+
+```bash
+$ sudo pip3 install aioqiniu
+```
 
 ## Requirements
 
@@ -35,6 +43,7 @@ if __name__ == "__main__":
 
 更多API细节可查看注释中提供的七牛官方文档地址。
 
-[version]: https://img.shields.io/badge/version-0.1.0-blue.svg
+[qiniu]: http://assets.qiniu.com/qiniu-204x109.png
+[version]: https://img.shields.io/badge/version-1.0.0-blue.svg
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
 [python]: https://img.shields.io/badge/python-%3E%3D3.5-blue.svg

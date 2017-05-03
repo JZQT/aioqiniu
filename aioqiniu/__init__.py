@@ -8,7 +8,7 @@ from base64 import b32encode, urlsafe_b64encode
 import qiniu
 import aiohttp
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 
 class QiniuClient(object):
