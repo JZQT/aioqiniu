@@ -8,7 +8,7 @@ from base64 import b32encode, urlsafe_b64encode
 import qiniu
 import aiohttp
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class QiniuClient(object):
@@ -319,25 +319,29 @@ class QiniuClient(object):
 
         return
 
-    async def upload_data(self, upload_token: str, data: bytes, key=None,
-                          params=None, filename=None, upload_host=None):
+    async def upload_data(self, data: bytes, token: str, key=None, params=None,
+                          filename=None, host=None) -> dict:
         """直传文件数据到七牛云
 
-        :param upload_token: 上传凭证
         :param data: 上传的字节码数据
+        :param token: 上传凭证
         :param key: 上传后的文件命名
         :param params: 用户自定义参数，可为空，dict类型
         :param filename: 上传的数据的文件名，默认为空
-        :param upload_host: 上传的服务器地址，默认为"upload.qiniu.com"
+        :param host: 上传的服务器地址，默认为"upload.qiniu.com"
 
         详见：https://developer.qiniu.com/kodo/api/1312/upload
         """
         filename = filename or b32encode(os.urandom(5)).decode()
         params = params or {}
-        upload_url = "http://{}".format(upload_host or "upload.qiniu.com")
+        host = host or "http://upload.qiniu.com"
+        if host.startswith("http://") or host.startswith("https://"):
+            url = host
+        else:
+            url = "http://{}".format(host)
 
         with aiohttp.MultipartWriter("form-data") as mpwriter:
-            mpwriter.append(upload_token, {
+            mpwriter.append(token, {
                 "Content-Disposition": 'form-data; name="token"',
             })
             mpwriter.append(key, {
@@ -353,11 +357,30 @@ class QiniuClient(object):
                 "Content-Transfer-Encoding": "binary",
             })
 
-        async with self._client.post(upload_url, data=mpwriter) as resp:
+        async with self._client.post(url, data=mpwriter) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
             ret = await resp.json()
 
         return ret
+
+    async def upload_file(self, filepath: str, token: str, key=None,
+                          params=None, host=None) -> dict:
+        """直传本地文件到七牛云
+
+        :param filepath: 待上传的文件路径
+        :param token: 上传凭证
+        :param key: 上传后的文件命名
+        :param params: 用户自定义参数，可为空，dict类型
+        :param host: 上传的服务器地址，默认为"upload.qiniu.com"
+
+        详见：https://developer.qiniu.com/kodo/api/1312/upload
+        """
+        with open(filepath, "rb") as f:
+            data = f.read()
+        filename = os.path.basename(filepath)
+        return await self.upload_data(
+            data=data, token=token, key=key, params=params,
+            filename=filename, host=host)
 
     async def prefetch(self, bucket: str, key: str) -> None:
         """镜像回源预取
