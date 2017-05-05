@@ -81,6 +81,6 @@ if __name__ == "__main__":
     * 其它主要是内部使用的API（非协程API，主要是生成token以及相关的数据格式）
 
 [qiniu]: http://assets.qiniu.com/qiniu-204x109.png
-[version]: https://img.shields.io/badge/version-1.0.0-blue.svg
+[version]: https://img.shields.io/badge/version-1.1.0-blue.svg
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
 [python]: https://img.shields.io/badge/python-%3E%3D3.5-blue.svg
