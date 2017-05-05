@@ -6,11 +6,11 @@ from setuptools import setup
 
 setup(
     name="aioqiniu",
+    version="1.1.0",
     author="JZQT",
-    url="https://github.com/JZQT/aioqiniu",
     author_email="jzqt@witcoder.com",
-    version="1.0.0",
-    description="Asynchronous Qiniu Cloud Storage client based on aiohttp",
+    url="https://github.com/JZQT/aioqiniu",
+    description="Asynchronous Qiniu Cloud Storage client based on asyncio",
     install_requires=['qiniu', 'aiohttp'],
     packages=['aioqiniu'],
     license="MIT",

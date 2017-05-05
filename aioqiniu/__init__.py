@@ -8,11 +8,21 @@ from base64 import b32encode, urlsafe_b64encode
 import qiniu
 import aiohttp
 
+from aioqiniu.utils import get_encoded_entry_uri
+
 __version__ = "1.1.0"
 
 
 class QiniuClient(object):
     """七牛云存储异步客户端"""
+
+    _opcode2arglen = {
+        "stat": (2, ),
+        "copy": (4, 5),
+        "move": (4, 5),
+        "rename": (3, 4),
+        "delete": (2, ),
+    }
 
     def __init__(self, access_key: str, secret_key: str, client=None):
         """初始化七牛云异步客户端
@@ -29,17 +39,6 @@ class QiniuClient(object):
             client = aiohttp.ClientSession()
             self._auto_close_client = True
         self._client = client
-
-    def get_encoded_entry_uri(self, bucket: str, key=None) -> str:
-        """生成七牛云API使用的EncodedEntryURI
-
-        :param bucket: 空间名
-        :param key: 文件名，默认为空
-
-        详见：https://developer.qiniu.com/kodo/api/1276/data-format
-        """
-        entry_uri = "{}:{}".format(bucket, key) if key else bucket
-        return urlsafe_b64encode(entry_uri.encode()).decode()
 
     def get_access_token(self, path: str, query="", body="") -> str:
         """生成七牛云的管理凭证
@@ -183,8 +182,8 @@ class QiniuClient(object):
 
         详见：https://developer.qiniu.com/kodo/api/1254/copy
         """
-        src_encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
-        dst_encoded_entry_uri = self.get_encoded_entry_uri(to_bucket, to_key)
+        src_encoded_entry_uri = get_encoded_entry_uri(bucket, key)
+        dst_encoded_entry_uri = get_encoded_entry_uri(to_bucket, to_key)
         path = "/copy/{}/{}/force/{}".format(
             src_encoded_entry_uri, dst_encoded_entry_uri,
             "true" if force else "false")
@@ -205,7 +204,7 @@ class QiniuClient(object):
 
         详见：https://developer.qiniu.com/kodo/api/1257/delete
         """
-        encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
+        encoded_entry_uri = get_encoded_entry_uri(bucket, key)
         path = "/delete/{}".format(encoded_entry_uri)
         access_token = self.get_access_token(path)
         headers = {"Authorization": "QBox {}".format(access_token)}
@@ -228,8 +227,8 @@ class QiniuClient(object):
 
         详见：https://developer.qiniu.com/kodo/api/1288/move
         """
-        src_encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
-        dst_encoded_entry_uri = self.get_encoded_entry_uri(to_bucket, to_key)
+        src_encoded_entry_uri = get_encoded_entry_uri(bucket, key)
+        dst_encoded_entry_uri = get_encoded_entry_uri(to_bucket, to_key)
         path = "/move/{}/{}/force/{}".format(
             src_encoded_entry_uri, dst_encoded_entry_uri,
             "true" if force else "false")
@@ -265,7 +264,7 @@ class QiniuClient(object):
 
         详见：https://developer.qiniu.com/kodo/api/1308/stat
         """
-        encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
+        encoded_entry_uri = get_encoded_entry_uri(bucket, key)
         path = "/stat/{}".format(encoded_entry_uri)
         access_token = self.get_access_token(path)
         headers = {"Authorization": "QBox {}".format(access_token)}
@@ -286,7 +285,7 @@ class QiniuClient(object):
 
         详见：https://developer.qiniu.com/kodo/api/1252/chgm
         """
-        encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
+        encoded_entry_uri = get_encoded_entry_uri(bucket, key)
         encoded_mime = urlsafe_b64encode(mime.encode()).decode()
         path = "/chgm/{}/mime/{}".format(encoded_entry_uri, encoded_mime)
         access_token = self.get_access_token(path)
@@ -308,7 +307,7 @@ class QiniuClient(object):
 
         详见：https://developer.qiniu.com/kodo/api/1732/update-file-lifecycle
         """
-        encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
+        encoded_entry_uri = get_encoded_entry_uri(bucket, key)
         path = "/deleteAfterDays/{}/{}".format(encoded_entry_uri, days)
         access_token = self.get_access_token(path)
         headers = {"Authorization": "QBox {}".format(access_token)}
@@ -393,7 +392,7 @@ class QiniuClient(object):
 
         详见：https://developer.qiniu.com/kodo/api/1293/prefetch
         """
-        encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
+        encoded_entry_uri = get_encoded_entry_uri(bucket, key)
         path = "/prefetch/{}".format(encoded_entry_uri)
         access_token = self.get_access_token(path)
         headers = {"Authorization": "QBox {}".format(access_token)}
@@ -414,7 +413,7 @@ class QiniuClient(object):
         详见：https://developer.qiniu.com/kodo/api/1263/fetch
         """
         encoded_url = urlsafe_b64encode(url.encode()).decode()
-        encoded_entry_uri = self.get_encoded_entry_uri(bucket, key)
+        encoded_entry_uri = get_encoded_entry_uri(bucket, key)
         path = "/fetch/{}/to/{}".format(encoded_url, encoded_entry_uri)
         access_token = self.get_access_token(path)
         headers = {"Authorization": "QBox {}".format(access_token)}
@@ -425,6 +424,58 @@ class QiniuClient(object):
             ret = await resp.json()
 
         return ret
+
+    async def batch(self, *operations) -> list:
+        """批量操作
+
+        支持的批量操作的操作类型：
+
+        * 查询文件信息，操作码"stat"
+        * 拷贝文件，操作码"copy"
+        * 移动文件，操作码"move"
+        * 重命名文件，操作码"rename"
+        * 删除文件，操作码"delete"
+
+        用操作元组来描述一个操作，操作元组的第一个元素是操作码，
+        之后的元组元素为对应方法的参数。下面是有效的操作元组示例：
+
+            ("stat", "BUCKET", "KEY")
+            ("copy", "BUCKET", "KEY", "TO_BUCKET", "TO_KEY", True)
+            ("move", "BUCKET", "KEY", "TO_BUCKET", "TO_KEY")
+            ("rename", "BUCKET", "KEY", "TO_KEY", True)
+            ("delete", "BUCKET", "KEY")
+
+        :param *operations: 变长位置参数，元素为操作元组
+
+        详见：https://developer.qiniu.com/kodo/api/1250/batch
+        """
+        querystring = "&".join(
+            [self._get_operation_string(op[0], *op[1:]) for op in operations]
+        )
+        access_token = self.get_access_token("/batch", querystring)
+        headers = {"Authorization": "QBox {}".format(access_token)}
+        url = "http://rs.qiniu.com/batch?" + querystring
+
+        async with self._client.post(url, headers=headers) as resp:
+            assert resp.status < 400, "HTTP {}".format(resp.status)
+            ret = await resp.json()
+
+        return ret
+
+    def _get_operation_string(self, code: str, *args) -> str:
+        assert code in self._opcode2arglen, "非法的操作码: {}".format(code)
+        assert len(args) in self._opcode2arglen[code], "操作参数错误"
+
+        if code in ("stat", "delete"):
+            return "op=/{}/{}".format(code, get_encoded_entry_uri(*args))
+        if code == "rename":
+            code = "move"
+            args = (*args[:2], args[0], *args[2:])
+        if code in ("move", "copy"):
+            src = get_encoded_entry_uri(args[0], args[1])
+            dst = get_encoded_entry_uri(args[2], args[3])
+            force = "true" if len(args) == 5 and args[4] else "false"
+            return "op=/{}/{}/{}/force/{}".format(code, src, dst, force)
 
     def __del__(self):
         if self._auto_close_client:

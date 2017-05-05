@@ -45,6 +45,25 @@ if __name__ == "__main__":
 
 ## Changelogs
 
+* `v1.1.0`(2017-05-05)
+
+    * API`QiniuClient.get_encoded_entry_uri`转移到新模块`aioqiniu.utils`中作为一个函数来使用
+
+    * 添加批量操作的API`QiniuClient.batch`
+
+    * 添加直传本地文件的API`QiniuClient.upload_file`
+
+    * 更改`QiniuClient.upload_data`方法的参数名，使API调用更加方便
+
+        * `upload_token -> token`
+        * `upload_host -> host`
+
+    * 更换`QiniuClient.upload_data`API的`data`和`token`的参数位置，调用更符合直觉，现在是这样调用
+
+        ```python
+        await qiniuclient.upload_data(data, token, ...)
+        ```
+
 * `v1.0.0`(2017-05-03)
 
     基于`asyncio`和`aiohttp`的七牛云Python异步客户端库。
