@@ -40,28 +40,36 @@ class QiniuClient(object):
             self._auto_close_client = True
         self._client = client
 
-    def token(self, data):
-        """
-        
-        :param data: 待签名的数据
+    def get_token(self, data: str):
+        """从原始数据中生成的token
+
+        该方法等同于`qiniu.Auth.token`
+
+        :param data: 待签名数据
+
         :return: 数据签名
         """
         return self._auth.token(data)
 
-    def token_with_data(self, data):
-        """
-        
-        :param data: 待签名的数据
+    def get_token_with_data(self, data: str):
+        """生成带原始数据的token
+
+        该方法等同于`qiniu.Auth.token_with_data`
+
+        :param data: 待签名数据
+
         :return: 数据签名，含已编码的原数据
         """
         return self._auth.token_with_data(data)
 
     def get_access_token(self, path: str, query="", body="") -> str:
-        """生成七牛云的管理凭证
+        """生成七牛云的管理凭证(access token)
 
         :param path: URL路径
         :param query: URL查询字符串，可以是str或dict类型，默认为空
         :param body: 请求body，默认为空
+
+        :return: 七牛云的管理凭证(access token)
 
         详见：https://developer.qiniu.com/kodo/manual/1201/access-token
         """
@@ -73,12 +81,14 @@ class QiniuClient(object):
 
     def get_upload_token(self, bucket: str, key=None, expires=3600,
                          policy=None, strict_policy=True) -> str:
-        """生成七牛云的上传凭证
+        """生成七牛云的上传凭证(upload token)
 
         :param bucket: 空间名
         :param key: 上传的文件命名，默认为空
         :param expires: 上传凭证过期时间，单位为秒，默认为3600
         :param policy: 上传策略，默认为空
+
+        :return: 七牛云的上传凭证(upload token)
 
         详见：https://developer.qiniu.com/kodo/manual/1208/upload-token
         """
@@ -91,6 +101,8 @@ class QiniuClient(object):
         :param bucket: 待创建空间名
         :param region: 待创建空间的存储区域，默认为"z0"表示华东，"z1"是华北
         :param g: global标记，默认为False
+
+        :return: None
 
         注意：谨慎使用，建议到七牛开发者平台进行操作。
 
@@ -115,6 +127,8 @@ class QiniuClient(object):
 
         :param bucket: 待删除空间名
 
+        :return: None
+
         注意：谨慎使用，建议到七牛开发者平台进行操作。
 
         详见：https://developer.qiniu.com/kodo/api/1601/drop-bucket
@@ -130,6 +144,8 @@ class QiniuClient(object):
 
     async def list_buckets(self) -> list:
         """列举该账户下的所有空间名
+
+        :return: 包含七牛云空间名字符串的列表
 
         详见：https://developer.qiniu.com/kodo/api/1613/user-buckets
         """
@@ -147,6 +163,8 @@ class QiniuClient(object):
         """列举指定存储空间绑定的域名列表
 
         :param bucket: 空间名
+
+        :return: 包含该空间绑定的域名的列表
 
         详见：https://developer.qiniu.com/kodo/api/1612/bucket-domainlist
         """
@@ -170,6 +188,8 @@ class QiniuClient(object):
         :param prefix: 指定文件的前缀，默认为空
         :param delimiter: 指定目录分隔符，会模拟目录的列出效果，默认为空
         :param marker: 上一次列举返回的标记，作为本次列举的起点，默认为空
+
+        :return: 匹配的文件信息
 
         详见：https://developer.qiniu.com/kodo/api/1284/list
         """
@@ -196,6 +216,8 @@ class QiniuClient(object):
         :param to_key: 目标文件名
         :param force: force标记，bool类型，默认为False
 
+        :return: None
+
         详见：https://developer.qiniu.com/kodo/api/1254/copy
         """
         src_encoded_entry_uri = get_encoded_entry_uri(bucket, key)
@@ -217,6 +239,8 @@ class QiniuClient(object):
 
         :param bucket: 待删除文件所在空间名
         :param key: 待删除文件名
+
+        :return: None
 
         详见：https://developer.qiniu.com/kodo/api/1257/delete
         """
@@ -240,6 +264,8 @@ class QiniuClient(object):
         :param to_bucket: 目标空间名
         :param to_key: 目标文件名
         :param force: force标记，bool类型，默认为False
+
+        :return: None
 
         详见：https://developer.qiniu.com/kodo/api/1288/move
         """
@@ -268,6 +294,8 @@ class QiniuClient(object):
         :param to_key: 目标文件名
         :param force: force标记，bool类型，默认为False
 
+        :return: None
+
         详见：https://developer.qiniu.com/kodo/api/1288/move
         """
         return await self.move(bucket, key, bucket, to_key, force)
@@ -277,6 +305,8 @@ class QiniuClient(object):
 
         :param bucket: 待查询文件空间名
         :param key: 待查询文件名
+
+        :return: 文件信息，包含hash，key，fsize和mimeType
 
         详见：https://developer.qiniu.com/kodo/api/1308/stat
         """
@@ -299,6 +329,8 @@ class QiniuClient(object):
         :param key: 待操作资源文件名
         :param mime: 待操作文件目标MIME类型信息
 
+        :return: None
+
         详见：https://developer.qiniu.com/kodo/api/1252/chgm
         """
         encoded_entry_uri = get_encoded_entry_uri(bucket, key)
@@ -320,6 +352,8 @@ class QiniuClient(object):
         :param bucket: 待设置文件所在空间名
         :param key: 待设置文件名
         :param days: 文件存活的天数，设置为0表示无限存活期
+
+        :return: None
 
         详见：https://developer.qiniu.com/kodo/api/1732/update-file-lifecycle
         """
@@ -344,6 +378,8 @@ class QiniuClient(object):
         :param params: 用户自定义参数，可为空，dict类型
         :param filename: 上传的数据的文件名，默认为空
         :param host: 上传的服务器地址，默认为"upload.qiniu.com"
+
+        :return: 上传后的文件信息，包含hash和key
 
         详见：https://developer.qiniu.com/kodo/api/1312/upload
         """
@@ -388,6 +424,8 @@ class QiniuClient(object):
         :param params: 用户自定义参数，可为空，dict类型
         :param host: 上传的服务器地址，默认为"upload.qiniu.com"
 
+        :return: 上传后的文件信息，包含hash和key
+
         详见：https://developer.qiniu.com/kodo/api/1312/upload
         """
         with open(filepath, "rb") as f:
@@ -405,6 +443,8 @@ class QiniuClient(object):
 
         :param bucket: 待获取资源的镜像空间名
         :param key: 待获取资源文件名
+
+        :return: None
 
         详见：https://developer.qiniu.com/kodo/api/1293/prefetch
         """
@@ -425,6 +465,8 @@ class QiniuClient(object):
         :param url: 要抓取的URL
         :param bucket: 目标资源空间名
         :param key: 目标资源文件名，默认为空
+
+        :return: 爬取成功后的文件信息，包含hash，key，fsize和mimeType
 
         详见：https://developer.qiniu.com/kodo/api/1263/fetch
         """
@@ -462,6 +504,8 @@ class QiniuClient(object):
             ("delete", "BUCKET", "KEY")
 
         :param *operations: 变长位置参数，元素为操作元组
+
+        :return: 包含每个操作的结果的列表
 
         详见：https://developer.qiniu.com/kodo/api/1250/batch
         """
