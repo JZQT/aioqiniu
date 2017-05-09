@@ -40,6 +40,22 @@ class QiniuClient(object):
             self._auto_close_client = True
         self._client = client
 
+    def token(self, data):
+        """
+        
+        :param data: 待签名的数据
+        :return: 数据签名
+        """
+        return self._auth.token(data)
+
+    def token_with_data(self, data):
+        """
+        
+        :param data: 待签名的数据
+        :return: 数据签名，含已编码的原数据
+        """
+        return self._auth.token_with_data(data)
+
     def get_access_token(self, path: str, query="", body="") -> str:
         """生成七牛云的管理凭证
 
