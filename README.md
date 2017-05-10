@@ -43,7 +43,35 @@ if __name__ == "__main__":
 
 更多API细节可查看注释中提供的七牛官方文档地址。
 
-## Changelogs
+## Changelog
+
+* `v1.2.0`(2017-05-10)
+
+    * `aioqiniu.utils`模块添加计算七牛etag相关的工具函数
+
+        * `get_stream_etag`
+
+            从一个流中读取数据并计算七牛etag
+
+        * `get_data_etag`
+
+            从字节码数据中计算七牛etag
+
+        * `get_file_etag`
+
+            从本地文件中读取数据计算七牛etag
+
+    * `QiniuClient`添加从原始数据中计算token的一些相关方法，用于替代`qiniu.Auth`的相关功能
+
+        * `get_token`
+
+            根据原始数据生成token，同`qiniu.Auth.token`
+
+        * `get_token_with_data`
+
+            根据原始数据生成含已编码原始数据的token，同`qiniu.Auth.token_with_data`
+
+    * 添加生成私有资源url的方法`QiniuClient.get_private_download_url`
 
 * `v1.1.0`(2017-05-05)
 
@@ -81,6 +109,6 @@ if __name__ == "__main__":
     * 其它主要是内部使用的API（非协程API，主要是生成token以及相关的数据格式）
 
 [qiniu]: http://assets.qiniu.com/qiniu-204x109.png
-[version]: https://img.shields.io/badge/version-1.1.0-blue.svg
+[version]: https://img.shields.io/badge/version-1.2.0-blue.svg
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
 [python]: https://img.shields.io/badge/python-%3E%3D3.5-blue.svg

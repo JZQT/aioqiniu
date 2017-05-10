@@ -10,7 +10,7 @@ import aiohttp
 
 from aioqiniu.utils import get_encoded_entry_uri
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 
 class QiniuClient(object):

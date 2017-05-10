@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="aioqiniu",
-    version="1.1.0",
+    version="1.2.0",
     author="JZQT",
     author_email="jzqt@witcoder.com",
     url="https://github.com/JZQT/aioqiniu",
