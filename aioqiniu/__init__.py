@@ -95,6 +95,18 @@ class QiniuClient(object):
         return self._auth.upload_token(bucket, key, expires, policy,
                                        strict_policy)
 
+    def get_private_download_url(self, url, expires=3600) -> str:
+        """生成私有资源的下载url
+
+        :param url: 私有资源的url
+        :param expires: 下载url的过期时间，单位为秒，默认为3600
+
+        :return: 私有资源的下载url
+
+        详见：https://developer.qiniu.com/kodo/manual/1202/download-token
+        """
+        return self._auth.private_download_url(url, expires)
+
     async def create_bucket(self, bucket: str, region=None, g=False) -> None:
         """创建空间
 
