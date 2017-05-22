@@ -1,6 +1,6 @@
 # aioqiniu
 
-![][qiniu]
+[![][qiniu_logo]](https://www.qiniu.com)
 
 ![][version] ![][license] ![][python]
 
@@ -45,11 +45,24 @@ if __name__ == "__main__":
 
 ## Tests
 
-使用`pytest`做单元测试，在该项目目录内运行
+本项目使用`pytest`做单元测试，运行测试需要安装以下依赖
+
+* `pytest`
+* `pytest-asyncio`
+
+运行下面的命令安装运行测试所需的依赖
+
+```bash
+$ sudo pip3 install pytest pytest-asyncio
+```
+
+在该项目根目录下执行以下命令来运行测试
 
 ```bash
 $ pytest
 ```
+
+**注意**：部分测试需要设置环境变量`QINIU_ACCESS_KEY`和`QINIU_SECRET_KEY`才会运行
 
 ## Changelog
 
@@ -116,7 +129,7 @@ $ pytest
     * 第三方资源抓取
     * 其它主要是内部使用的API（非协程API，主要是生成token以及相关的数据格式）
 
-[qiniu]: http://assets.qiniu.com/qiniu-204x109.png
+[qiniu_logo]: http://assets.qiniu.com/qiniu-204x109.png
 [version]: https://img.shields.io/badge/version-1.2.0-blue.svg
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
 [python]: https://img.shields.io/badge/python-%3E%3D3.5-blue.svg
