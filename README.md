@@ -49,11 +49,12 @@ if __name__ == "__main__":
 
 * `pytest`
 * `pytest-asyncio`
+* `pytest-incremental`
 
 运行下面的命令安装运行测试所需的依赖
 
 ```bash
-$ sudo pip3 install pytest pytest-asyncio
+$ sudo pip3 install pytest pytest-asyncio pytest-incremental
 ```
 
 在该项目根目录下执行以下命令来运行测试
@@ -65,6 +66,10 @@ $ pytest
 **注意**：部分测试需要设置环境变量`QINIU_ACCESS_KEY`和`QINIU_SECRET_KEY`才会运行
 
 ## Changelog
+
+* `v1.3.0`(未发布)
+
+    * `QiniuClient`的初始化参数`client`更改为`httpclient`
 
 * `v1.2.0`(2017-05-10)
 
