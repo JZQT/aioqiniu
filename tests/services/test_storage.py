@@ -17,7 +17,7 @@ class TestStorageServiceMixin(object):
 
     def setup(self):
         if qiniu_environ_is_set_correctly():
-            ioloop = asyncio.new_event_loop()
+            ioloop = asyncio.get_event_loop()
             self.qiniu_client = ioloop.run_until_complete(get_qiniu_client())
             self.qiniu = qiniu.Auth(*get_qiniu_environ())
 
@@ -44,9 +44,12 @@ class TestStorageServiceMixin(object):
     async def test_upload_file(self):
         token = self.qiniu.upload_token(TEST_BUCKET)
         key = os.path.basename(__file__)
-        filedata = await self.qiniu_client.upload_file(__file__, token, key)
+        filedata = await self.qiniu_client.upload_file(
+            __file__, token, key, mimetype="text/plain")
         assert filedata["key"] == key
         assert filedata["hash"] == qiniu.etag(__file__)
+        # 防止上传过快导致无法在bucket里查询出该上传文件的信息
+        await asyncio.sleep(5)
 
     @require_qiniu_environ
     @pytest.mark.asyncio
@@ -61,6 +64,7 @@ class TestStorageServiceMixin(object):
         key = os.path.basename(__file__)
         filestat = await self.qiniu_client.get_file_stat(TEST_BUCKET, key)
         assert filestat is not None and isinstance(filestat, dict)
+        assert filestat["mimeType"] == "text/plain"     # 上传时设置的mimetype
 
     @require_qiniu_environ
     @pytest.mark.asyncio

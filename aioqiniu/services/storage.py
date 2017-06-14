@@ -295,7 +295,7 @@ class StorageServiceMixin(object):
         return
 
     async def upload_data(self, data: bytes, token: str, key=None, params=None,
-                          filename=None, host=None) -> dict:
+                          filename=None, mimetype=None, host=None) -> dict:
         """直传文件数据到七牛云
 
         :param data: 上传的字节码数据
@@ -303,6 +303,7 @@ class StorageServiceMixin(object):
         :param key: 上传后的文件命名
         :param params: 用户自定义参数，可为空，dict类型
         :param filename: 上传的数据的文件名，默认为空
+        :param mimetype: 上传数据的mimetype值，默认为空，可由七牛自动探测
         :param host: 上传的服务器地址，默认为"upload.qiniu.com"
 
         :return: 上传后的文件信息，包含hash和key
@@ -328,11 +329,14 @@ class StorageServiceMixin(object):
                 mpwriter.append(value, {
                     "Content-Disposition": 'form-data; name="{}"'.format(name),
                 })
-            mpwriter.append(BytesIO(data), {
+            mpheaders = {
                 "Content-Disposition":
                     'form-data; name="file"; filename="{}"'.format(filename),
                 "Content-Transfer-Encoding": "binary",
-            })
+            }
+            if mimetype:
+                mpheaders["Content-Type"] = mimetype
+            mpwriter.append(BytesIO(data), mpheaders)
 
         async with self._httpclient.post(url, data=mpwriter) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
@@ -341,13 +345,14 @@ class StorageServiceMixin(object):
         return ret
 
     async def upload_file(self, filepath: str, token: str, key=None,
-                          params=None, host=None) -> dict:
+                          params=None, mimetype=None, host=None) -> dict:
         """直传本地文件到七牛云
 
         :param filepath: 待上传的文件路径
         :param token: 上传凭证
         :param key: 上传后的文件命名
         :param params: 用户自定义参数，可为空，dict类型
+        :param mimetype: 上传文件的mimetype值，默认为空，可由七牛自动探测
         :param host: 上传的服务器地址，默认为"upload.qiniu.com"
 
         :return: 上传后的文件信息，包含hash和key
@@ -359,7 +364,7 @@ class StorageServiceMixin(object):
         filename = os.path.basename(filepath)
         return await self.upload_data(
             data=data, token=token, key=key, params=params,
-            filename=filename, host=host)
+            filename=filename, mimetype=mimetype, host=host)
 
     async def prefetch(self, bucket: str, key: str) -> None:
         """镜像回源预取

@@ -70,6 +70,7 @@ $ pytest
 * `v1.3.0`(未发布)
 
     * `QiniuClient`的初始化参数`client`更改为`httpclient`
+    * `QiniuClient`的`upload_data`和`upload_file`方法添加`mimetype`参数
 
 * `v1.2.0`(2017-05-10)
 
