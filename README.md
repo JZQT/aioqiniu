@@ -71,6 +71,7 @@ $ pytest
 
     * `QiniuClient`的初始化参数`client`更改为`httpclient`
     * `QiniuClient`的`upload_data`和`upload_file`方法添加`mimetype`参数
+    * 添加新模块`aioqiniu.exceptions`，包含异常类`HTTPError`，作为与七牛服务器交互产生的HTTP错误异常类
 
 * `v1.2.0`(2017-05-10)
 

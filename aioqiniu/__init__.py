@@ -6,6 +6,7 @@ import qiniu
 import aiohttp
 
 from aioqiniu.services import StorageServiceMixin
+from aioqiniu.exceptions import HTTPError       # noqa: F401
 
 __version__ = "1.2.0"
 
