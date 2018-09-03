@@ -16,7 +16,7 @@ $ sudo pip3 install aioqiniu
 
 * Python &gt;= 3.5
 * qiniu
-* aiohttp
+* aiohttp &gt;= 3.4.0
 
 ## Getting started
 
@@ -69,7 +69,7 @@ $ pytest
 
 ## Changelog
 
-* `v1.3.0`(未发布)
+* `v1.3.0`(2018-09-04)
 
     * `QiniuClient` 的初始化参数 `client` 更改为 `httpclient`
     * `QiniuClient` 的 `upload_data` 和 `upload_file` 方法添加 `mimetype` 参数
@@ -156,6 +156,6 @@ $ pytest
     * 其它主要是内部使用的API（非协程API，主要是生成token以及相关的数据格式）
 
 [qiniu_logo]: http://assets.qiniu.com/qiniu-204x109.png
-[version]: https://img.shields.io/badge/version-1.2.0-blue.svg
+[version]: https://img.shields.io/badge/version-1.3.0-blue.svg
 [license]: https://img.shields.io/badge/license-MIT-blue.svg
 [python]: https://img.shields.io/badge/python-%3E%3D3.5-blue.svg
