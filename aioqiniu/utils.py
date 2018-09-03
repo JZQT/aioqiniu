@@ -4,6 +4,10 @@ from io import BytesIO
 from base64 import urlsafe_b64encode
 
 import qiniu.utils
+from aiohttp.client import ClientResponse
+from aiohttp.client_exceptions import ContentTypeError
+
+from aioqiniu.exceptions import QiniuError
 
 
 def get_encoded_entry_uri(bucket: str, key: str = None) -> str:
@@ -46,3 +50,15 @@ def get_file_etag(filepath: str) -> str:
     etag算法详见：https://developer.qiniu.com/kodo/manual/1231/appendix#3
     """
     return qiniu.utils.etag(filepath)
+
+
+async def raise_for_error(response: ClientResponse):
+    if response.status < 300:
+        return
+    try:
+        value = await response.json()
+        raise QiniuError(code=value['code'], error=value['error'])
+    except QiniuError:
+        raise
+    except (KeyError, TypeError, ContentTypeError):
+        response.raise_for_status()

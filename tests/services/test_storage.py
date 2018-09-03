@@ -85,5 +85,3 @@ class TestStorageServiceMixin(object):
     async def test_delete_bucket(self):
         ret = await self.qiniu_client.delete_bucket(TEST_BUCKET)
         assert ret is None
-
-    pass

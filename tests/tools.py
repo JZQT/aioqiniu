@@ -35,10 +35,10 @@ def get_qiniu_environ() -> tuple:
     """
     assert qiniu_environ_is_set_correctly(), QINIU_ENV_ERROR_MESSAGE
 
-    return (os.environ[QINIU_ACCESS_KEY_ENV], os.environ[QINIU_SECRET_KEY_ENV])
+    return os.environ[QINIU_ACCESS_KEY_ENV], os.environ[QINIU_SECRET_KEY_ENV]
 
 
-async def get_qiniu_client():
+async def get_qiniu_client() -> aioqiniu.QiniuClient:
     """获取一个用于测试的`aioqiniu.QiniuClient`对象
 
     注意：每次调用函数都会重新生成一个对象

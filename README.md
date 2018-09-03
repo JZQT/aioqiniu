@@ -27,10 +27,12 @@ import asyncio
 
 import aioqiniu
 
+
 async def main():
-    client = aioqiniu.QiniuClient("MY_ACCESS_KEY", "MY_SECRET_KEY")
-    stat = await client.get_file_stat("BUCKET_NAME", "FILE_NAME")
-    print(stat)
+    async with aioqiniu.QiniuClient("MY_ACCESS_KEY", "MY_SECRET_KEY") as client:
+        stat = await client.get_file_stat("BUCKET_NAME", "FILE_NAME")
+        print(stat)
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
@@ -71,7 +73,7 @@ $ pytest
 
     * `QiniuClient` 的初始化参数 `client` 更改为 `httpclient`
     * `QiniuClient` 的 `upload_data` 和 `upload_file` 方法添加 `mimetype` 参数
-    * 添加新模块 `aioqiniu.exceptions`，包含异常类`HTTPError`，作为与七牛服务器交互产生的HTTP错误异常类
+    * 添加新模块 `aioqiniu.exceptions`，包含异常类 `QiniuError`，作为与七牛服务器交互产生的业务异常
     * 完善类型注释
     * 现在可以通过 `.httpclient` 来访问 `QiniuClient` 所使用的 `aiohttp.client.ClientSession` 的对象
     * 添加 `close`, `__aenter__` 以及 `__aexit__` 等方法，现在可以像类似 aiohttp 的 `ClientSession` 一样关闭 `QiniuClient`

@@ -7,7 +7,7 @@ from base64 import urlsafe_b64encode, b32encode
 
 import aiohttp
 
-from aioqiniu.utils import get_encoded_entry_uri
+from aioqiniu.utils import get_encoded_entry_uri, raise_for_error
 
 
 class StorageServiceMixin(object):
@@ -44,7 +44,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def delete_bucket(self, bucket: str) -> None:
         """删除空间
@@ -62,7 +62,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com/drop/{}".format(bucket)
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def list_buckets(self) -> list:
         """列举该账户下的所有空间名
@@ -76,7 +76,7 @@ class StorageServiceMixin(object):
         url = "https://rs.qbox.me/buckets"
 
         async with self.httpclient.get(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
             bucket_list = await resp.json()
 
         return bucket_list
@@ -96,7 +96,7 @@ class StorageServiceMixin(object):
         url = "https://api.qiniu.com/v6/domain/list?{}".format(querystring)
 
         async with self.httpclient.get(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
             domain_list = await resp.json()
 
         return domain_list
@@ -124,7 +124,7 @@ class StorageServiceMixin(object):
         url = "https://rsf.qbox.me/list?{}".format(querystring)
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
             files = await resp.json()
 
         return files
@@ -153,7 +153,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def delete_file(self, bucket: str, key: str) -> None:
         """删除文件
@@ -170,7 +170,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def move_file(self, bucket: str, key: str, to_bucket: str,
                         to_key: str, force: bool = False) -> None:
@@ -194,7 +194,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def rename_file(self, bucket: str, key: str, to_key: str,
                           force: bool = False) -> None:
@@ -228,7 +228,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com" + path
 
         async with self.httpclient.get(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
             stat = await resp.json()
 
         return stat
@@ -250,7 +250,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def delete_file_after_days(self, bucket: str, key: str,
                                      days: int) -> None:
@@ -269,7 +269,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def upload_data(self, data: bytes, token: str, key: str = None,
                           params: dict = None, filename: str = None,
@@ -317,7 +317,7 @@ class StorageServiceMixin(object):
             mpwriter.append(BytesIO(data), mpheaders)
 
         async with self.httpclient.post(url, data=mpwriter) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
             ret = await resp.json()
 
         return ret
@@ -363,7 +363,7 @@ class StorageServiceMixin(object):
         url = "https://iovip.qbox.me" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
 
     async def fetch(self, url: str, bucket: str, key: str = None) -> dict:
         """七牛云第三方资源抓取
@@ -384,7 +384,7 @@ class StorageServiceMixin(object):
         url = "https://iovip.qbox.me" + path
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status == 200, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
             ret = await resp.json()
 
         return ret
@@ -423,7 +423,7 @@ class StorageServiceMixin(object):
         url = "http://rs.qiniu.com/batch?" + querystring
 
         async with self.httpclient.post(url, headers=headers) as resp:
-            assert resp.status < 400, "HTTP {}".format(resp.status)
+            await raise_for_error(resp)
             ret = await resp.json()
 
         return ret
