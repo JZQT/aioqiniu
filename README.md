@@ -69,9 +69,26 @@ $ pytest
 
 * `v1.3.0`(未发布)
 
-    * `QiniuClient`的初始化参数`client`更改为`httpclient`
-    * `QiniuClient`的`upload_data`和`upload_file`方法添加`mimetype`参数
-    * 添加新模块`aioqiniu.exceptions`，包含异常类`HTTPError`，作为与七牛服务器交互产生的HTTP错误异常类
+    * `QiniuClient` 的初始化参数 `client` 更改为 `httpclient`
+    * `QiniuClient` 的 `upload_data` 和 `upload_file` 方法添加 `mimetype` 参数
+    * 添加新模块 `aioqiniu.exceptions`，包含异常类`HTTPError`，作为与七牛服务器交互产生的HTTP错误异常类
+    * 完善类型注释
+    * 现在可以通过 `.httpclient` 来访问 `QiniuClient` 所使用的 `aiohttp.client.ClientSession` 的对象
+    * 添加 `close`, `__aenter__` 以及 `__aexit__` 等方法，现在可以像类似 aiohttp 的 `ClientSession` 一样关闭 `QiniuClient`
+
+        ```python
+        async with QiniuClient() as client:
+            # do something
+            pass
+        ```
+
+        ```python
+        async def use_qiniu_client():
+            client = QiniuClient()
+            # do something
+            await client.close()
+        ```
+    * 修复 `QiniuClient.rename_file` 方法不可用的 bug
 
 * `v1.2.0`(2017-05-10)
 

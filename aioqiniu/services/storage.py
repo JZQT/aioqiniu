@@ -21,7 +21,7 @@ class StorageServiceMixin(object):
         "delete": (2, ),
     }
 
-    async def create_bucket(self, bucket: str, region=None, g=False) -> None:
+    async def create_bucket(self, bucket: str, region: str = None, g: bool = False) -> None:
         """创建空间
 
         :param bucket: 待创建空间名
@@ -43,10 +43,8 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
-
-        return
 
     async def delete_bucket(self, bucket: str) -> None:
         """删除空间
@@ -63,10 +61,8 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com/drop/{}".format(bucket)
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
-
-        return
 
     async def list_buckets(self) -> list:
         """列举该账户下的所有空间名
@@ -79,7 +75,7 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "https://rs.qbox.me/buckets"
 
-        async with self._httpclient.get(url, headers=headers) as resp:
+        async with self.httpclient.get(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
             bucket_list = await resp.json()
 
@@ -99,14 +95,15 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "https://api.qiniu.com/v6/domain/list?{}".format(querystring)
 
-        async with self._httpclient.get(url, headers=headers) as resp:
+        async with self.httpclient.get(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
             domain_list = await resp.json()
 
         return domain_list
 
-    async def list_files(self, bucket: str, limit=1000, prefix=None,
-                         delimiter=None, marker=None) -> dict:
+    async def list_files(self, bucket: str, limit: int = 1000,
+                         prefix: str = None, delimiter: str = None,
+                         marker: str = None) -> dict:
         """列举文件
 
         :param bucket: 待列举文件空间名
@@ -126,14 +123,14 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "https://rsf.qbox.me/list?{}".format(querystring)
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
             files = await resp.json()
 
         return files
 
     async def copy_file(self, bucket: str, key: str, to_bucket: str,
-                        to_key: str, force=False) -> None:
+                        to_key: str, force: bool =False) -> None:
         """拷贝文件
 
         :param bucket: 待拷贝文件空间名
@@ -155,18 +152,14 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
-
-        return
 
     async def delete_file(self, bucket: str, key: str) -> None:
         """删除文件
 
         :param bucket: 待删除文件所在空间名
         :param key: 待删除文件名
-
-        :return: None
 
         详见：https://developer.qiniu.com/kodo/api/1257/delete
         """
@@ -176,13 +169,11 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
 
-        return
-
     async def move_file(self, bucket: str, key: str, to_bucket: str,
-                        to_key: str, force=False) -> None:
+                        to_key: str, force: bool = False) -> None:
         """移动文件
 
         :param bucket: 待移动文件空间名
@@ -190,8 +181,6 @@ class StorageServiceMixin(object):
         :param to_bucket: 目标空间名
         :param to_key: 目标文件名
         :param force: force标记，bool类型，默认为False
-
-        :return: None
 
         详见：https://developer.qiniu.com/kodo/api/1288/move
         """
@@ -204,13 +193,11 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
 
-        return
-
     async def rename_file(self, bucket: str, key: str, to_key: str,
-                          force=False) -> None:
+                          force: bool = False) -> None:
         """重命名文件
 
         本质上是调用移动文件功能来实现。
@@ -220,11 +207,9 @@ class StorageServiceMixin(object):
         :param to_key: 目标文件名
         :param force: force标记，bool类型，默认为False
 
-        :return: None
-
         详见：https://developer.qiniu.com/kodo/api/1288/move
         """
-        return await self.move(bucket, key, bucket, to_key, force)
+        return await self.move_file(bucket, key, bucket, to_key, force)
 
     async def get_file_stat(self, bucket: str, key: str) -> dict:
         """查询文件信息
@@ -242,7 +227,7 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com" + path
 
-        async with self._httpclient.get(url, headers=headers) as resp:
+        async with self.httpclient.get(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
             stat = await resp.json()
 
@@ -255,8 +240,6 @@ class StorageServiceMixin(object):
         :param key: 待操作资源文件名
         :param mime: 待操作文件目标MIME类型信息
 
-        :return: None
-
         详见：https://developer.qiniu.com/kodo/api/1252/chgm
         """
         encoded_entry_uri = get_encoded_entry_uri(bucket, key)
@@ -266,10 +249,8 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
-
-        return
 
     async def delete_file_after_days(self, bucket: str, key: str,
                                      days: int) -> None:
@@ -279,8 +260,6 @@ class StorageServiceMixin(object):
         :param key: 待设置文件名
         :param days: 文件存活的天数，设置为0表示无限存活期
 
-        :return: None
-
         详见：https://developer.qiniu.com/kodo/api/1732/update-file-lifecycle
         """
         encoded_entry_uri = get_encoded_entry_uri(bucket, key)
@@ -289,13 +268,12 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
 
-        return
-
-    async def upload_data(self, data: bytes, token: str, key=None, params=None,
-                          filename=None, mimetype=None, host=None) -> dict:
+    async def upload_data(self, data: bytes, token: str, key: str = None,
+                          params: dict = None, filename: str = None,
+                          mimetype: str = None, host: str = None) -> dict:
         """直传文件数据到七牛云
 
         :param data: 上传的字节码数据
@@ -338,14 +316,15 @@ class StorageServiceMixin(object):
                 mpheaders["Content-Type"] = mimetype
             mpwriter.append(BytesIO(data), mpheaders)
 
-        async with self._httpclient.post(url, data=mpwriter) as resp:
+        async with self.httpclient.post(url, data=mpwriter) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
             ret = await resp.json()
 
         return ret
 
-    async def upload_file(self, filepath: str, token: str, key=None,
-                          params=None, mimetype=None, host=None) -> dict:
+    async def upload_file(self, filepath: str, token: str, key: str = None,
+                          params: dict = None, mimetype: str = None,
+                          host: str = None) -> dict:
         """直传本地文件到七牛云
 
         :param filepath: 待上传的文件路径
@@ -375,8 +354,6 @@ class StorageServiceMixin(object):
         :param bucket: 待获取资源的镜像空间名
         :param key: 待获取资源文件名
 
-        :return: None
-
         详见：https://developer.qiniu.com/kodo/api/1293/prefetch
         """
         encoded_entry_uri = get_encoded_entry_uri(bucket, key)
@@ -385,12 +362,10 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "https://iovip.qbox.me" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
 
-        return
-
-    async def fetch(self, url: str, bucket: str, key=None) -> dict:
+    async def fetch(self, url: str, bucket: str, key: str = None) -> dict:
         """七牛云第三方资源抓取
 
         :param url: 要抓取的URL
@@ -408,7 +383,7 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "https://iovip.qbox.me" + path
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status == 200, "HTTP {}".format(resp.status)
             ret = await resp.json()
 
@@ -447,7 +422,7 @@ class StorageServiceMixin(object):
         headers = {"Authorization": "QBox {}".format(access_token)}
         url = "http://rs.qiniu.com/batch?" + querystring
 
-        async with self._httpclient.post(url, headers=headers) as resp:
+        async with self.httpclient.post(url, headers=headers) as resp:
             assert resp.status < 400, "HTTP {}".format(resp.status)
             ret = await resp.json()
 
@@ -467,5 +442,3 @@ class StorageServiceMixin(object):
             dst = get_encoded_entry_uri(args[2], args[3])
             force = "true" if len(args) == 5 and args[4] else "false"
             return "op=/{}/{}/{}/force/{}".format(code, src, dst, force)
-
-    pass

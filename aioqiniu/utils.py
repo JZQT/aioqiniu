@@ -6,7 +6,7 @@ from base64 import urlsafe_b64encode
 import qiniu.utils
 
 
-def get_encoded_entry_uri(bucket: str, key=None) -> str:
+def get_encoded_entry_uri(bucket: str, key: str = None) -> str:
     """生成七牛云API使用的EncodedEntryURI
 
     :param bucket: 空间名

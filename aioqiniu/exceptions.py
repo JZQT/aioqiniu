@@ -14,5 +14,3 @@ class HTTPError(Exception):
         if self.message:
             return "{} {}".format(self.status_code, self.message)
         return str(self.status_code)
-
-    pass

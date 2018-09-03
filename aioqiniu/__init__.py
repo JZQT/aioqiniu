@@ -1,9 +1,10 @@
 # coding: utf-8
 
+from typing import Union
 from urllib.parse import urlencode
 
 import qiniu
-import aiohttp
+from aiohttp.client import ClientSession
 
 from aioqiniu.services import StorageServiceMixin
 from aioqiniu.exceptions import HTTPError       # noqa: F401
@@ -14,23 +15,34 @@ __version__ = "1.2.0"
 class QiniuClient(StorageServiceMixin):
     """七牛云存储异步客户端"""
 
-    def __init__(self, access_key: str, secret_key: str, httpclient=None):
+    def __init__(self, access_key: str, secret_key: str, httpclient: ClientSession = None):
         """初始化七牛云异步客户端
 
-        :param access_key: 七牛云的AccessKey
-        :param secret_key: 七牛云的SecretKey
-        :param httpclient: 自定义`aiohttp.ClientSession`对象，默认为空，自动创建
+        :param access_key: 七牛云 AccessKey
+        :param secret_key: 七牛云 SecretKey
+        :param httpclient: 自定义 `aiohttp.client.ClientSession` 对象，默认为空，自动创建
         """
         self.__access_key = access_key
         self.__secret_key = secret_key
         self._auth = qiniu.Auth(access_key, secret_key)
-        self._auto_close_httpclient = False
         if httpclient is None:
-            httpclient = aiohttp.ClientSession()
-            self._auto_close_httpclient = True
-        self._httpclient = httpclient
+            httpclient = ClientSession()
+        self.httpclient = httpclient
 
-    def get_token(self, data: str):
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+
+    async def close(self) -> None:
+        await self.httpclient.close()
+
+    @property
+    def closed(self) -> bool:
+        return self.httpclient.closed
+
+    def get_token(self, data: str) -> str:
         """从原始数据中生成的token
 
         该方法等同于`qiniu.Auth.token`
@@ -41,7 +53,7 @@ class QiniuClient(StorageServiceMixin):
         """
         return self._auth.token(data)
 
-    def get_token_with_data(self, data: str):
+    def get_token_with_data(self, data: str) -> str:
         """生成带原始数据的token
 
         该方法等同于`qiniu.Auth.token_with_data`
@@ -52,12 +64,12 @@ class QiniuClient(StorageServiceMixin):
         """
         return self._auth.token_with_data(data)
 
-    def get_access_token(self, path: str, query="", body="") -> str:
+    def get_access_token(self, path: str, query: Union[str, dict] = "", body: str = "") -> str:
         """生成七牛云的管理凭证(access token)
 
-        :param path: URL路径
-        :param query: URL查询字符串，可以是str或dict类型，默认为空
-        :param body: 请求body，默认为空
+        :param path: URL 路径
+        :param query: URL 查询字符串，可以是 str 或 dict 类型
+        :param body: 请求 body
 
         :return: 七牛云的管理凭证(access token)
 
@@ -69,8 +81,8 @@ class QiniuClient(StorageServiceMixin):
             query = urlencode(query)
         return self._auth.token("{}?{}\n{}".format(path, query, body))
 
-    def get_upload_token(self, bucket: str, key=None, expires=3600,
-                         policy=None, strict_policy=True) -> str:
+    def get_upload_token(self, bucket: str, key: str = None, expires: int = 3600,
+                         policy=None, strict_policy: bool = True) -> str:
         """生成七牛云的上传凭证(upload token)
 
         :param bucket: 空间名
@@ -82,23 +94,18 @@ class QiniuClient(StorageServiceMixin):
 
         详见：https://developer.qiniu.com/kodo/manual/1208/upload-token
         """
-        return self._auth.upload_token(bucket, key, expires, policy,
-                                       strict_policy)
+        return self._auth.upload_token(
+            bucket, key, expires, policy, strict_policy
+        )
 
-    def get_private_download_url(self, url, expires=3600) -> str:
-        """生成私有资源的下载url
+    def get_private_download_url(self, url: str, expires: int = 3600) -> str:
+        """生成私有资源的下载 URL
 
-        :param url: 私有资源的url
-        :param expires: 下载url的过期时间，单位为秒，默认为3600
+        :param url: 私有资源的 URL
+        :param expires: 下载 URL 的过期时间，单位为秒，默认为 3600
 
-        :return: 私有资源的下载url
+        :return: 私有资源的下载 URL
 
         详见：https://developer.qiniu.com/kodo/manual/1202/download-token
         """
         return self._auth.private_download_url(url, expires)
-
-    def __del__(self):
-        if self._auto_close_httpclient:
-            self._httpclient.close()
-
-    pass
