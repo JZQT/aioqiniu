@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="aioqiniu",
-    version="1.3.0",
+    version="1.3.1",
     author="JZQT",
     author_email="jzqt@witcoder.com",
     url="https://github.com/JZQT/aioqiniu",
@@ -15,7 +15,7 @@ setup(
         'qiniu',
         'aiohttp>=3.4.0',
     ],
-    packages=['aioqiniu'],
+    packages=['aioqiniu', 'aioqiniu.services'],
     license="MIT",
     keywords="qiniu asyncio",
     classifiers=[
